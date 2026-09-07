@@ -1,0 +1,23 @@
+python-dotenv
+
+# LangChain
+langchain==1.4.0
+langchain-community
+langchain-text-splitters
+
+# Jina embeddings
+jinaai
+
+# LLM PROVIDER
+langchain-groq
+langchain-text-splitters
+
+# vector store
+faiss-cpu
+
+# notebook
+jupyter
+ipykernel
+
+# web app
+streamlit

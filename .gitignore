@@ -216,3 +216,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Strict Environment Security & Virtual Envs
+.env
+.env.*
+*.env
+!.env.example
+basicragenv/
+
+# FAISS / Vector store indexes
+*.faiss
+*.pkl
+faiss_index/
+vectorstore/
+
+# macOS
+.DS_Store
+
