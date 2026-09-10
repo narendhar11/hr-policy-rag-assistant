@@ -1,29 +1,31 @@
 # 🏢 HR Policy RAG Assistant
 
-An end-to-end **Retrieval-Augmented Generation (RAG)** system built with **LangChain**, **Jina AI Embeddings**, **FAISS**, **Groq LLM**, and **Streamlit** to provide fast, contextual Q&A over HR policy documents.
+An end-to-end **Retrieval-Augmented Generation (RAG)** assistant built with **LangChain**, **Jina AI Embeddings**, **FAISS**, **Groq LLM**, and **Streamlit** to deliver fast, contextual answers over company HR policy documents.
 
 ![HR Policy RAG Assistant Architecture](docs/architecture.png)
-*(Note: Upload the generated architecture diagram to a `docs/` folder to display it here on GitHub)*
 
 ---
 
 ## 📌 Features
 
-* **Data Ingestion:** Supports text documents, JSON, Excel, and structured policy files.
-* **Document Chunking:** Configurable text splitting (Character and Recursive Splitters) for accurate chunk retrieval.
-* **Vector Embeddings:** Uses **Jina AI Embeddings** to generate dense semantic vector representations.
-* **Vector Database:** Fast similarity search with **FAISS**.
-* **LLM Inference:** Ultra-low latency responses powered by **Groq** (`openai/gpt-oss-120b`).
-* **Web UI:** Interactive Streamlit web application.
-* **Configurable:** Centralized `config.yaml` for easy tuning without touching code.
+* **Document Ingestion:** Parses HR policy text documents and metadata cleanly.
+* **Intelligent Chunking:** Configurable recursive character text splitting (`chunk_size=500`, `chunk_overlap=50`) preserving policy context.
+* **Semantic Embeddings:** Powered by **Jina AI Embeddings v2** (`jina-embeddings-v2-base-en`).
+* **Vector Store & Retrieval:** Fast local vector similarity search using **FAISS** with cached index management.
+* **Ultra-Fast LLM Inference:** High-throughput responses via **Groq** (`openai/gpt-oss-120b`).
+* **LangChain Agent & Tools:** ReAct agent architecture equipped with a dedicated HR policy retriever tool.
+* **LangSmith Observability:** Integrated tracing to inspect and evaluate agent runs, tool calls, and latency.
+* **Modern Web UI:** Dark-themed, responsive **Streamlit** interface with real-time status and sample queries.
+* **Clean Configuration:** Centralized, type-safe [`config.py`](Production_RAG/config.py) supporting `.env` parameter overrides.
+* **Comprehensive Test Suite:** 32 unit tests covering all modular components.
 
 ---
 
 ## 🔒 Security Notice
 
-> ⚠️ **IMPORTANT:** Never expose or commit real API keys or `.env` files to GitHub.
+> ⚠️ **IMPORTANT:** Never commit real API keys or `.env` files to GitHub.
 > 
-> The `.gitignore` file is configured to ignore all `.env` files. Copy `.env.example` to `.env` locally and populate your secret keys.
+> The project `.gitignore` ignores all local `.env` files and vector indexes. Copy `.env.example` to `.env` and configure your credentials locally.
 
 ---
 
@@ -31,26 +33,41 @@ An end-to-end **Retrieval-Augmented Generation (RAG)** system built with **LangC
 
 ```text
 hr-policy-rag-assistant/
-├── Basic_RAG_experimental/         # Experimental RAG pipeline & research (Jupyter notebooks)
-├── Production_RAG/                 # Production-ready modular RAG system
-│   ├── app.py                      # Streamlit UI Entry Point
-│   ├── main.py                     # Alternative CLI entry point
-│   ├── config.py                   # Loads environment variables & config.yaml
-│   ├── config.yaml                 # Application settings (model, chunk size, top_k)
-│   ├── pipeline.py                 # Wires components together
-│   ├── agent.py                    # LangChain Agent initialization
-│   ├── tools.py                    # LangChain tool definitions
-│   ├── chunking/                   # Text splitting logic
-│   ├── embeddings/                 # Jina embeddings integration
-│   ├── ingestion/                  # Document loaders
-│   ├── llm/                        # Groq LLM client
-│   ├── prompts/                    # System prompts and templates
-│   ├── retrieval/                  # FAISS retrieval logic
-│   ├── vectordb/                   # Vector store build/save/load
-│   ├── pyproject.toml              # Python package configuration
-│   ├── .env.example                # Environment variables template
-│   └── tests/                      # Pytest suite
-└── README.md                       # Project documentation
+├── Basic_RAG_experimental/       # Experimental RAG pipeline & research (Jupyter notebooks)
+├── Production_RAG/               # Production modular RAG system
+│   ├── app.py                    # Streamlit UI Entry Point
+│   ├── main.py                   # Alternative CLI Entry Point
+│   ├── pipeline.py               # End-to-end RAG orchestrator
+│   ├── config.py                 # Centralized configuration & environment loader
+│   ├── .streamlit/
+│   │   └── config.toml           # Streamlit dark theme configuration
+│   ├── agent/
+│   │   └── agent.py              # LangChain agent builder
+│   ├── tools/
+│   │   └── tools.py              # Agent tool definitions (retriever search)
+│   ├── ingestion/
+│   │   └── loader.py             # Document loader
+│   ├── chunking/
+│   │   └── chunker.py            # Recursive text splitting logic
+│   ├── embeddings/
+│   │   └── embedder.py           # Jina AI embeddings wrapper
+│   ├── vectordb/
+│   │   └── vector_store.py       # FAISS build, save, and load utilities
+│   ├── retrieval/
+│   │   └── retriever.py          # Vector store retriever setup
+│   ├── llm/
+│   │   └── llm_client.py         # Groq Chat model setup
+│   ├── prompts/
+│   │   └── prompt_templates.py   # System prompts and templates
+│   ├── utils/
+│   │   ├── logger.py             # Centralized timestamped file & console logger
+│   │   └── tracing.py            # LangSmith observability setup & validation
+│   ├── data/
+│   │   └── hr_policies.txt       # HR policy source document
+│   ├── tests/                    # Pytest test suite (32 unit tests)
+│   ├── pyproject.toml            # Python packaging & dependencies (uv compatible)
+│   └── .env.example              # Environment variables template
+└── README.md                     # Root project documentation
 ```
 
 ---
@@ -58,104 +75,124 @@ hr-policy-rag-assistant/
 ## 🚀 Quick Start
 
 ### Prerequisites
-* **Python 3.14.6** is required.
-* API Keys for **Groq** and **Jina AI**.
+* **Python 3.10+** (Tested on Python 3.14.6)
+* API Key for **Groq** ([console.groq.com](https://console.groq.com))
+* API Key for **Jina AI** ([jina.ai](https://jina.ai))
+* *(Optional)* API Key for **LangSmith** ([smith.langchain.com](https://smith.langchain.com)) for tracing
 
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/narendhar11/hr-policy-rag-assistant.git
-cd hr-policy-rag-assistant
+cd hr-policy-rag-assistant/Production_RAG
 ```
 
-### 2. Create & Activate Virtual Environment (If using pip)
-*(Note: If you use `uv` in Step 3, you can skip this step!)*
+### 2. Install Dependencies
 
+You can use the lightning-fast `uv` package manager or standard `pip`:
+
+**Option A: Using `uv` (Recommended)**
 ```bash
-# macOS / Linux
-python3 -m venv basicragenv
-source basicragenv/bin/activate
-
-# Windows
-python -m venv basicragenv
-basicragenv\Scripts\activate
-```
-
-### 3. Install Dependencies
-Since the production app uses a modern `pyproject.toml`, you can install it using standard `pip` or the lightning-fast `uv` package manager:
-
-**Option A: Using `uv` (Recommended for speed)**
-`uv` automatically creates a virtual environment (`.venv`) for you and installs everything instantly.
-```bash
-# If you don't have uv installed: pip install uv
-cd Production_RAG
+# If uv is not installed: pip install uv
 uv sync
 ```
 
 **Option B: Using standard `pip`**
 ```bash
-cd Production_RAG
+python3 -m venv .venv
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-### 4. Configure Environment Variables
-Create your local `.env` file from the example template:
+### 3. Configure Environment Variables
+Create your local `.env` file from `.env.example`:
 ```bash
-cd Production_RAG
 cp .env.example .env
 ```
 
-Open `Production_RAG/.env` and set your API keys:
+Edit `Production_RAG/.env` with your API keys:
 ```env
+# Groq LLM
 GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=openai/gpt-oss-120b
+
+# Jina AI Embeddings
 JINA_API_KEY=your_jina_api_key_here
+
+# (Optional) LangSmith Observability
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+LANGSMITH_API_KEY=your_langsmith_api_key_here
+LANGSMITH_PROJECT=hr-policy-rag
 ```
 
-### 5. Run the Application
-Launch the Streamlit web interface:
+### 4. Run the Application
 
-**If you used `uv`:**
+#### Web UI (Streamlit)
 ```bash
-cd Production_RAG
+# With uv
 uv run streamlit run app.py
+
+# With standard virtual environment
+streamlit run app.py
 ```
 
-**If you used `pip` (with an activated virtual environment):**
+#### CLI Mode
 ```bash
-cd Production_RAG
-streamlit run app.py
+# With uv
+uv run python main.py
+
+# With standard virtual environment
+python main.py
 ```
 
 ---
 
-## 🛠️ Configuration (`config.yaml`)
+## ⚙️ Configuration
 
-You can tune the RAG pipeline easily by modifying the `config.yaml` file in the `Production_RAG` directory. No Python code changes are required!
+All hyperparameters are centralized in [`Production_RAG/config.py`](Production_RAG/config.py) and can be overridden directly via environment variables in `.env`:
 
-```yaml
-llm:
-  model: "openai/gpt-oss-20b"
-  temperature: 0
+| Parameter | Default Value | Environment Variable | Description |
+|---|---|---|---|
+| `LLM_MODEL_NAME` | `openai/gpt-oss-120b` | `GROQ_MODEL` | Groq LLM model identifier |
+| `LLM_TEMPERATURE` | `0.0` | `LLM_TEMPERATURE` | Sampling temperature for LLM |
+| `EMBEDDING_MODEL_NAME` | `jina-embeddings-v2-base-en` | `EMBEDDING_MODEL` | Jina embedding model name |
+| `CHUNK_SIZE` | `500` | `CHUNK_SIZE` | Text chunk character length |
+| `CHUNK_OVERLAP` | `50` | `CHUNK_OVERLAP` | Overlap characters between chunks |
+| `TOP_K_RESULTS` | `3` | `TOP_K_RESULTS` | Number of retrieved chunks passed to agent |
+| `LANGSMITH_TRACING` | `false` | `LANGSMITH_TRACING` | Enable LangSmith tracing (`true` / `false`) |
 
-embeddings:
-  model: "jina-embeddings-v2-base-en"
+---
 
-chunking:
-  chunk_size: 500
-  chunk_overlap: 50
+## 🔍 LangSmith Observability
 
-retrieval:
-  top_k: 3
-```
+When `LANGSMITH_TRACING=true` is enabled in `.env`, all interactions are automatically traced:
+* **Agent thought process:** Tool calls, tool arguments, and returned chunk content.
+* **Retrieval latency:** Time spent embedding questions and querying the FAISS index.
+* **Token usage & costs:** Exact prompt and completion token counts from Groq.
+
+View your execution traces at [smith.langchain.com](https://smith.langchain.com).
 
 ---
 
 ## 🧪 Testing
 
-The project includes a `pytest` suite for smoke testing the pipeline configuration.
-Run tests from the root directory:
+The repository includes a comprehensive unit test suite with 32 tests using `pytest` (with mocked API calls):
+
 ```bash
-pytest Production_RAG/tests/
+cd Production_RAG
+uv run pytest tests/ -v
+# or: pytest tests/ -v
 ```
+
+Test coverage includes:
+- Document loading and metadata (`test_ingestion.py`)
+- Text chunking and overlap (`test_chunking.py`)
+- Vector store caching & persistence (`test_vectordb.py`)
+- Retriever instantiation and top-k filtering (`test_retrieval.py`)
+- Agent tool execution (`test_tools.py`)
+- Prompt templates and consistency (`test_prompts.py`)
+- LangSmith tracing configuration (`test_tracing.py`)
+- Pipeline smoke tests (`test_pipeline.py`)
 
 ---
 

@@ -1,7 +1,7 @@
 [project]
 name = "production-rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "HR Policy RAG Assistant — LangChain + Groq + FAISS + Jina Embeddings"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -14,7 +14,10 @@ dependencies = [
     "faiss-cpu",
     "jinaai",
     "streamlit",
-    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
     "pytest",
 ]
 

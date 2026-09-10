@@ -3,7 +3,6 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import yaml
 
 # Absolute path to the Production_RAG directory — works regardless of working directory
 _BASE_DIR = Path(__file__).parent
@@ -11,39 +10,36 @@ _BASE_DIR = Path(__file__).parent
 # Always load .env from Production_RAG/.env explicitly
 load_dotenv(dotenv_path=_BASE_DIR / ".env")
 
-# Load configuration from config.yaml
-with open(_BASE_DIR / "config.yaml", "r") as f:
-    _yaml_config = yaml.safe_load(f)
-
-# API Keys
+# ── API Keys ───────────────────────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 JINA_API_KEY = os.getenv("JINA_API_KEY")
 
-# Paths — absolute so they work regardless of where the process is launched from
-DATA_FILE_PATH = os.getenv("DATA_FILE_PATH", str(_BASE_DIR.parent / _yaml_config.get("paths", {}).get("data", "Production_RAG/data/hr_policies.txt")))
-VECTOR_STORE_PATH = os.getenv("VECTOR_STORE_PATH", str(_BASE_DIR.parent / _yaml_config.get("paths", {}).get("vector_store", "Production_RAG/data/faiss_index")))
+# ── LangSmith Observability ────────────────────────────────────────────────────
+LANGSMITH_TRACING  = os.getenv("LANGSMITH_TRACING", "false").lower() == "true"
+LANGSMITH_ENDPOINT = os.getenv("LANGSMITH_ENDPOINT", "https://api.smith.langchain.com")
+LANGSMITH_API_KEY  = os.getenv("LANGSMITH_API_KEY")
+LANGSMITH_PROJECT  = os.getenv("LANGSMITH_PROJECT", "hr-policy-rag")
 
-# LLM CONFIG
-LLM_MODEL_NAME = _yaml_config.get("llm", {}).get("model", "openai/gpt-oss-20b")
-LLM_TEMPERATURE = _yaml_config.get("llm", {}).get("temperature", 0)
+# ── Paths ──────────────────────────────────────────────────────────────────────
+DATA_FILE_PATH    = os.getenv("DATA_FILE_PATH", str(_BASE_DIR / "data" / "hr_policies.txt"))
+VECTOR_STORE_PATH = os.getenv("VECTOR_STORE_PATH", str(_BASE_DIR / "data" / "faiss_index"))
 
-# EMBEDDING CONFIG
-EMBEDDING_MODEL_NAME = _yaml_config.get("embeddings", {}).get("model", "jina-embeddings-v2-base-en")
+# ── Models & Hyperparameters ───────────────────────────────────────────────────
+LLM_MODEL_NAME       = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+LLM_TEMPERATURE      = float(os.getenv("LLM_TEMPERATURE", "0.0"))
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL", "jina-embeddings-v2-base-en")
+CHUNK_SIZE           = int(os.getenv("CHUNK_SIZE", "500"))
+CHUNK_OVERLAP        = int(os.getenv("CHUNK_OVERLAP", "50"))
+TOP_K_RESULTS        = int(os.getenv("TOP_K_RESULTS", "3"))
 
-# TEXT SPLITTING CONFIG
-CHUNK_SIZE = _yaml_config.get("chunking", {}).get("chunk_size", 500)
-CHUNK_OVERLAP = _yaml_config.get("chunking", {}).get("chunk_overlap", 50)
-
-# RETRIEVAL CONFIG
-TOP_K_RESULTS = _yaml_config.get("retrieval", {}).get("top_k", 3)
-
-# SYSTEM PROMPT OR SYSTEM INSTRUCTIONS TO GUIDE THE LLM'S BEHAVIOR
-SYSTEM_PROMPT = ("You are a friendly HR assistant working for Vertexon Solutions. "
-                 "Always use the search_hr_policy tool to look up facts before answering. "
-                 "If the answer isn't in the search results, say you don't know instead of guessing.")
+# ── System Prompt ─────────────────────────────────────────────────────────────
+SYSTEM_PROMPT = (
+    "You are a friendly HR assistant working for Vertexon Solutions. "
+    "Always use the search_hr_policy tool to look up facts before answering. "
+    "If the answer isn't in the search results, say you don't know instead of guessing."
+)
 
 
-# Function to check if API keys are set
 def check_api_keys():
     """Check if the required API keys are set in the environment variables."""
     if not GROQ_API_KEY:
