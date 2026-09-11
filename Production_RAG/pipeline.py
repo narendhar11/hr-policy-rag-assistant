@@ -14,6 +14,7 @@ from retrieval.retriever import get_retriever
 from llm.llm_client import get_llm
 from tools.tools import search_hr_policy_tool
 from agent.agent import create_hr_policy_agent
+from llm_guard.guardrails import REFUSAL_MESSAGE, check_input_safety, check_output_safety
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -65,8 +66,20 @@ def build_hr_policy_assistant(file_path: str = config.DATA_FILE_PATH):
 def ask_hr_policy_question(agent, question: str) -> str:
     """Ask a question to the HR policy assistant agent and return the answer."""
     logger.info("Asking HR policy question: '%s'", question)
+
+    # Input safe guard - safe input check
+    # safe or not, reason
+    input_is_safe, _ = check_input_safety(question)
+    if not input_is_safe:
+        return REFUSAL_MESSAGE
+
     response = agent.invoke({"messages": [{"role": "user", "content": question}]})
     answer = response["messages"][-1].content
+    # Output safe guard - safe output check
+    output_is_safe,_ = check_output_safety(answer)
+    if not output_is_safe:
+        return REFUSAL_MESSAGE
+
     logger.info("Received answer:'%s", answer)
     return answer
 

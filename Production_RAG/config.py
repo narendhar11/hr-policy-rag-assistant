@@ -39,6 +39,9 @@ SYSTEM_PROMPT = (
     "If the answer isn't in the search results, say you don't know instead of guessing."
 )
 
+# ── GUARD MODEL ───────────────────────────────────────────────────────────────
+GUARD_MODEL_NAME = "openai/gpt-oss-safeguard-20b"
+
 
 def check_api_keys():
     """Check if the required API keys are set in the environment variables."""
