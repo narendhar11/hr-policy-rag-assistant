@@ -3,8 +3,6 @@ HR Policy RAG Assistant — Streamlit UI
 Vertexon Solutions | Powered by LangChain + Groq + FAISS + Jina Embeddings
 """
 
-import sys
-import os
 import streamlit as st
 
 from pipeline import build_hr_policy_assistant, ask_hr_policy_question
