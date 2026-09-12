@@ -6,7 +6,6 @@ from ingestion.loader import load_documents
 from chunking.chunker import split_into_chunks
 from vectordb.vector_store import (
     build_vector_store,
-    save_vector_store,
     load_vector_store,
     vector_store_exists,
 )
@@ -21,22 +20,21 @@ logger = get_logger(__name__)
 
 
 def build_vector_store_for_documents(file_path: str = config.DATA_FILE_PATH):
-    """Build the vector store for the documents and save it to the specified path. Load, split, embed, and save the vector store."""
+    """Build or load the Qdrant cloud vector store. Loads documents, splits into chunks, and embeds into Qdrant."""
     if vector_store_exists():
-        print("Vector store already exists. Loading the existing vector store.")
-        logger.info("Vector store already exists at '%s'. Loading the existing vector store.", config.VECTOR_STORE_PATH)
+        print("Qdrant collection already exists. Loading the existing vector store.")
+        logger.info("Qdrant collection already exists. Loading existing vector store.")
         return load_vector_store()
 
     # Load documents
-    logger.info("Vector store does not exist. Building a new vector store from documents.")
+    logger.info("Qdrant collection not found. Building new vector store from documents.")
     documents = load_documents(file_path)
     # Split documents into chunks
     chunks = split_into_chunks(documents)
     logger.info("Number of chunks created: %d from %s", len(chunks), file_path)
-    # Build vector store from chunks and save it
+    # Build and persist vector store in Qdrant
     vector_store = build_vector_store(chunks)
-    save_vector_store(vector_store)
-    logger.info("Vector store built and saved to '%s'", config.VECTOR_STORE_PATH)
+    logger.info("Qdrant vector store built and persisted to collection '%s'", config.QDRANT_COLLECTION_NAME)
     return vector_store
 
 

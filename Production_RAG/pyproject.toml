@@ -1,7 +1,7 @@
 [project]
 name = "production-rag"
 version = "0.1.0"
-description = "HR Policy RAG Assistant — LangChain + Groq + FAISS + Jina Embeddings"
+description = "HR Policy RAG Assistant — LangChain + Groq + Qdrant + Jina Embeddings"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -11,9 +11,10 @@ dependencies = [
     "langchain-core",
     "langchain-groq",
     "langchain-text-splitters",
-    "faiss-cpu",
     "jinaai",
     "streamlit",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.19.0",
 ]
 
 [project.optional-dependencies]

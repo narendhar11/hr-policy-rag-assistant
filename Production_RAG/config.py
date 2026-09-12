@@ -22,7 +22,6 @@ LANGSMITH_PROJECT  = os.getenv("LANGSMITH_PROJECT", "hr-policy-rag")
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 DATA_FILE_PATH    = os.getenv("DATA_FILE_PATH", str(_BASE_DIR / "data" / "hr_policies.txt"))
-VECTOR_STORE_PATH = os.getenv("VECTOR_STORE_PATH", str(_BASE_DIR / "data" / "faiss_index"))
 
 # ── Models & Hyperparameters ───────────────────────────────────────────────────
 LLM_MODEL_NAME       = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
@@ -42,6 +41,10 @@ SYSTEM_PROMPT = (
 # ── GUARD MODEL ───────────────────────────────────────────────────────────────
 GUARD_MODEL_NAME = "openai/gpt-oss-safeguard-20b"
 
+# ── ClOUD VECTOR (QDRANT) ───────────────────────────────────────────────────────────────
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
 
 def check_api_keys():
     """Check if the required API keys are set in the environment variables."""

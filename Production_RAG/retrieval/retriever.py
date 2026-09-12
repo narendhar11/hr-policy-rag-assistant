@@ -1,4 +1,4 @@
-"""Create a retriever from the FAISS vector store."""
+"""Create a retriever from the Qdrant vector store."""
 
 import config
 from utils.logger import get_logger

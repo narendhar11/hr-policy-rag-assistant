@@ -1,6 +1,6 @@
 """
 HR Policy RAG Assistant — Streamlit UI
-Vertexon Solutions | Powered by LangChain + Groq + FAISS + Jina Embeddings
+Vertexon Solutions | Powered by LangChain + Groq + Qdrant + Jina Embeddings
 """
 
 import streamlit as st
@@ -223,7 +223,7 @@ with st.sidebar:
     <div class="stack-h">Powered by</div>
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">LangChain</div><div class="stack-r">Agent framework</div></div></div>
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Groq</div><div class="stack-r">LLM inference</div></div></div>
-    <div class="stack-row"><div class="pip"></div><div><div class="stack-n">FAISS</div><div class="stack-r">Vector store</div></div></div>
+    <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Qdrant</div><div class="stack-r">Cloud vector store</div></div></div>
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Jina</div><div class="stack-r">Embeddings</div></div></div>
     <div class="divider"></div>
     """, unsafe_allow_html=True)
