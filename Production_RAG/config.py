@@ -24,7 +24,7 @@ LANGSMITH_PROJECT  = os.getenv("LANGSMITH_PROJECT", "hr-policy-rag")
 DATA_FILE_PATH    = os.getenv("DATA_FILE_PATH", str(_BASE_DIR / "data" / "hr_policies.txt"))
 
 # ── Models & Hyperparameters ───────────────────────────────────────────────────
-LLM_MODEL_NAME       = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+LLM_MODEL_NAME       = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 LLM_TEMPERATURE      = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL", "jina-embeddings-v2-base-en")
 CHUNK_SIZE           = int(os.getenv("CHUNK_SIZE", "500"))
@@ -46,9 +46,20 @@ QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
 
+#-----
+PORTKEY_API_KEY=os.getenv("PORTKEY_API_KEY")
+PORTKEY_CONFIG_SLUG=os.getenv("PORTKEY_CONFIG_SLUG")
+PORTKEY_GUARD_CONFIG_SLUG=os.getenv("PORTKEY_GUARD_CONFIG_SLUG") 
+
 def check_api_keys():
     """Check if the required API keys are set in the environment variables."""
     if not GROQ_API_KEY:
         raise ValueError("GROQ_API_KEY is not set. Please add it in your environment variables.")
     if not JINA_API_KEY:
         raise ValueError("JINA_API_KEY is not set. Please add it in your environment variables.")
+    if not PORTKEY_API_KEY:
+        raise ValueError("PORTKEY_API_KEY is not set. Please add it in your environment variables.")
+    if not PORTKEY_CONFIG_SLUG:
+        raise ValueError("PORTKEY_CONFIG_SLUG is not set. Please add it in your environment variables.")
+    if not PORTKEY_GUARD_CONFIG_SLUG:
+        raise ValueError("PORTKEY_GUARD_CONFIG_SLUG is not set. Please add it in your environment variables.")

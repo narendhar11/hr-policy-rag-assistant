@@ -1,7 +1,7 @@
 import json
-from langchain_groq import ChatGroq
 
 from config import GUARD_MODEL_NAME
+from llm_gateway.gateway import get_gateway_guard_llm
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -9,11 +9,7 @@ logger = get_logger(__name__)
 
 REFUSAL_MESSAGE = "I'm sorry, but I cannot provide an answer to that question. Please ask a different question related to HR policies."
 
-_guard_llm = ChatGroq(
-    model=GUARD_MODEL_NAME,
-    temperature=0,
-    model_kwargs={"response_format":{"type":"json_object"}}
-)
+_guard_llm = get_gateway_guard_llm()
 
 INPUT_POLICY = """\
 INSTRUCTIONS
