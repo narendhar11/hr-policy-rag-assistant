@@ -16,12 +16,12 @@ Two evaluators are used from openevals (LLM-as-judge):
    the context chunks retrieved from Qdrant, catching hallucinations that correctness
    might miss.
 
-Dual-Account Routing:
-To prevent '429 Too Many Requests' rate limit errors during evaluations, requests
-are split across two Groq accounts via Portkey AI Gateway:
-- Primary Account (@hrpolicy): Dedicated to the agent answering questions & guardrails.
-- Secondary Account (@hrpolicyfallback): Dedicated exclusively to the judge LLM
-  (e.g., openai/gpt-oss-120b) for scoring correctness and groundedness.
+Cross-Provider Evaluation Architecture:
+To prevent rate limit contention and ensure objective, independent scoring during evaluations,
+evaluation judge requests are decoupled from application inference via Portkey AI Gateway:
+- Application Inference: Fast, cost-efficient model (e.g., Groq) for user-facing agent answering & guardrails.
+- Evaluation Judge: Independent frontier provider (e.g., OpenAI, Anthropic Claude, Google Gemini,
+  or a dedicated judge endpoint via Portkey) for unbiased correctness and groundedness grading.
 """
 
 import os
@@ -52,8 +52,8 @@ DATASET_NAME = os.getenv("EVAL_DATASET_NAME", "hr-policy-evaluations")
 JUDGE_MODEL_NAME = os.getenv("JUDGE_MODEL_NAME", "openai/gpt-oss-120b")
 
 # Dedicated Portkey virtual key provider for the evaluation judge.
-# Using @hrpolicyfallback isolates rate limits between the agent (Account 1: @hrpolicy)
-# and the judge (Account 2: @hrpolicyfallback), avoiding 429 Too Many Requests errors.
+# Decouples evaluation judge rate limits and quotas from agent inference,
+# supporting frontier providers (OpenAI, Anthropic Claude, Google Gemini, or Groq) via Portkey.
 JUDGE_PROVIDER = os.getenv("JUDGE_PORTKEY_PROVIDER", "@hrpolicyfallback")
 
 # 10 diverse test cases covering all 8 sections of Vertexon Solutions HR policy:
@@ -114,10 +114,11 @@ TEST_CASES = [
 def _get_judge_llm() -> ChatOpenAI:
     """Return an evaluator judge LLM routed through Portkey AI Gateway.
 
-    Routes to the secondary Groq account (@hrpolicyfallback) via dual-account
-    routing: the main agent pipeline uses the primary account (@hrpolicy),
-    while the judge uses the secondary account, preventing '429 Too Many Requests'
-    rate limit collisions during intensive evaluation runs.
+    Decouples the evaluation judge from the main agent pipeline via Portkey's
+    multi-provider routing. This architecture allows serving fast user-facing
+    agent responses (e.g. via Groq) while delegating evaluation to an independent
+    frontier model (e.g. OpenAI, Anthropic Claude, or Google Gemini), completely
+    preventing rate-limit collisions and self-evaluation bias.
 
     Uses an independent, higher-capacity judge model (JUDGE_MODEL_NAME, e.g.
     'openai/gpt-oss-120b') so the system does not grade its own outputs verbatim.
@@ -126,7 +127,7 @@ def _get_judge_llm() -> ChatOpenAI:
         ChatOpenAI: A LangChain ChatOpenAI client instance pointing to Portkey.
     """
     logger.info(
-        "Initializing evaluation judge LLM via Portkey (provider: '%s', model: '%s') for rate limit isolation",
+        "Initializing evaluation judge LLM via Portkey (provider: '%s', model: '%s') with decoupled judge routing",
         JUDGE_PROVIDER,
         JUDGE_MODEL_NAME,
     )

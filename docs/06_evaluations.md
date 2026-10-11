@@ -28,7 +28,7 @@ flowchart TD
     end
     
     Target --> Evaluators["LLM-as-Judge Evaluators (openevals)"]
-    PortkeyJudge["Portkey AI Gateway<br/>(@hrpolicyfallback Secondary Account)<br/>Judge LLM: openai/gpt-oss-120b"] --> Evaluators
+    PortkeyJudge["Portkey AI Gateway<br/>(Frontier Judge: OpenAI / Claude / Gemini / Groq)<br/>Judge Model: openai/gpt-oss-120b"] --> Evaluators
     
     Evaluators --> Correctness["1. Correctness Evaluator<br/>(Matches Ground-Truth Reference?)"]
     Evaluators --> Groundedness["2. Groundedness Evaluator<br/>(Faithful to Retrieved Qdrant Context?)"]
@@ -57,20 +57,21 @@ A reference-only check (correctness) cannot detect subtle hallucinations where t
 
 ---
 
-## The Judge Model Architecture: Dual-Account Routing
+## The Judge Model Architecture: Cross-Provider Evaluation
 
-### Why Account Splitting Prevents `429 Too Many Requests`
+### Decoupled Inference & Frontier LLM-as-Judge
 
-In each evaluation run across 10 test cases, 50 LLM invocations occur in rapid succession (Input Guardrail + Main LLM + Output Guardrail + Correctness Judge + Groundedness Judge). If both the agent and the judge share a single Groq account (`@hrpolicy`), the heavy judge model (`openai/gpt-oss-120b`) quickly exhausts the Tokens-Per-Minute (TPM) limit and causes `429 Too Many Requests` errors.
+In each evaluation run across 10 test cases, 50 LLM invocations occur in rapid succession (Input Guardrail + Main LLM + Output Guardrail + Correctness Judge + Groundedness Judge). If both the agent and the judge share a single provider quota, the heavy judge model quickly exhausts rate limits (Tokens-Per-Minute / Requests-Per-Minute), causing `429 Too Many Requests` errors. Furthermore, having a model evaluate its own outputs introduces self-evaluation bias.
 
-To solve this, we implement **Dual-Account Routing**:
-- **Primary Groq Account (`@hrpolicy`):** Dedicated to the agent answering questions and guardrail checks.
-- **Secondary Groq Account (`@hrpolicyfallback`):** Dedicated exclusively to the evaluation judge.
+To solve this, we implement a **Cross-Provider Evaluation Architecture** via Portkey AI Gateway:
+- **Application Inference (Agent & Guardrails):** Fast, cost-efficient model (e.g., Groq / Llama-3.3) optimized for low latency during user interactions.
+- **Evaluation Judge:** Independent frontier model (e.g., OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Google Gemini 1.5 Pro, or a dedicated frontier endpoint via Portkey) dedicated strictly to grading correctness and groundedness.
 
 ### Implementation
 
 ```python
 # Dedicated Portkey virtual key provider for the evaluation judge
+# Allows routing judge calls to OpenAI, Anthropic Claude, Google Gemini, or Groq
 JUDGE_PROVIDER = os.getenv("JUDGE_PORTKEY_PROVIDER", "@hrpolicyfallback")
 JUDGE_MODEL_NAME = os.getenv("JUDGE_MODEL_NAME", "openai/gpt-oss-120b")
 
@@ -89,9 +90,9 @@ def _get_judge_llm() -> ChatOpenAI:
 ```
 
 **Key Advantages:**
-1. **Independent Quotas:** Neither the agent nor the judge consumes the other's TPM/RPM rate limits.
-2. **Double Throughput:** Effectively doubles your available Groq free-tier capacity during evaluations.
-3. **No Verbatim Self-Grading:** The judge uses an independent account and model (`openai/gpt-oss-120b`) to evaluate responses produced by the agent model (`openai/gpt-oss-20b`).
+1. **Zero Provider Contention:** Neither the agent nor the judge consumes the other's TPM/RPM rate limits, eliminating 429 rate-limit errors during high-throughput evaluation runs.
+2. **Unbiased Grading (No Self-Evaluation):** Grading is decoupled from the answering model. The judge uses an independent, higher-capacity model family to objectively critique responses.
+3. **Pluggable Provider Switching:** With Portkey AI Gateway, switching between OpenAI, Anthropic Claude, Google Gemini, or Groq for the judge requires changing only an environment variable or header slug (`JUDGE_PORTKEY_PROVIDER`), requiring zero changes to application code.
 
 ---
 

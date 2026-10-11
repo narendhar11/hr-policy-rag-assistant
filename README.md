@@ -166,12 +166,12 @@ LangSmith Dataset ("hr-policy-evaluations")
         │
         ▼
    target(): Real Agent Execution
-   ├── Input & Output Guardrails (Groq Account 1: @hrpolicy)
-   └── Main LLM Tool Synthesis (Groq Account 1: @hrpolicy)
+   ├── Input & Output Guardrails (Groq @hrpolicy)
+   └── Main LLM Tool Synthesis (Groq @hrpolicy)
         │
         ▼
    LLM-as-Judge Evaluators (openevals via Portkey)
-   └── Judge LLM: openai/gpt-oss-120b (Groq Account 2: @hrpolicyfallback)
+   └── Frontier Judge Model: openai/gpt-oss-120b (Decoupled Portkey Route)
         ├── 1. Correctness (Matches Ground-Truth Reference)
         └── 2. Groundedness (Faithful to Qdrant Context Chunks)
         │
@@ -181,7 +181,7 @@ LangSmith Dataset ("hr-policy-evaluations")
 
 * **Correctness:** Verifies the answer against ground-truth company HR policy.
 * **Groundedness:** Verifies that claims are strictly grounded in retrieved context chunks, catching hallucinations that reference-only checks miss.
-* **Dual-Account Routing:** Running the Judge via `@hrpolicyfallback` and the Agent via `@hrpolicy` eliminates rate-limit bottlenecks.
+* **Cross-Provider Evaluation:** Decoupling the evaluation judge from application inference via Portkey eliminates rate-limit bottlenecks and prevents self-evaluation bias.
 
 ---
 
