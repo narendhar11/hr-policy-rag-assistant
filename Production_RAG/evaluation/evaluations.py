@@ -16,7 +16,7 @@ Two evaluators are used from openevals (LLM-as-judge):
    the context chunks retrieved from Qdrant, catching hallucinations that correctness
    might miss.
 
-Quota Isolation Architecture:
+Dual-Account Routing:
 To prevent '429 Too Many Requests' rate limit errors during evaluations, requests
 are split across two Groq accounts via Portkey AI Gateway:
 - Primary Account (@hrpolicy): Dedicated to the agent answering questions & guardrails.
@@ -114,8 +114,8 @@ TEST_CASES = [
 def _get_judge_llm() -> ChatOpenAI:
     """Return an evaluator judge LLM routed through Portkey AI Gateway.
 
-    Routes to the dedicated fallback Groq account (@hrpolicyfallback) to achieve
-    Quota Isolation: the main agent pipeline uses the primary account (@hrpolicy),
+    Routes to the secondary Groq account (@hrpolicyfallback) via dual-account
+    routing: the main agent pipeline uses the primary account (@hrpolicy),
     while the judge uses the secondary account, preventing '429 Too Many Requests'
     rate limit collisions during intensive evaluation runs.
 

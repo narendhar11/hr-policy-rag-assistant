@@ -57,13 +57,13 @@ A reference-only check (correctness) cannot detect subtle hallucinations where t
 
 ---
 
-## The Judge Model Architecture: Quota Isolation
+## The Judge Model Architecture: Dual-Account Routing
 
 ### Why Account Splitting Prevents `429 Too Many Requests`
 
 In each evaluation run across 10 test cases, 50 LLM invocations occur in rapid succession (Input Guardrail + Main LLM + Output Guardrail + Correctness Judge + Groundedness Judge). If both the agent and the judge share a single Groq account (`@hrpolicy`), the heavy judge model (`openai/gpt-oss-120b`) quickly exhausts the Tokens-Per-Minute (TPM) limit and causes `429 Too Many Requests` errors.
 
-To solve this, we implement **Quota Isolation**:
+To solve this, we implement **Dual-Account Routing**:
 - **Primary Groq Account (`@hrpolicy`):** Dedicated to the agent answering questions and guardrail checks.
 - **Secondary Groq Account (`@hrpolicyfallback`):** Dedicated exclusively to the evaluation judge.
 
