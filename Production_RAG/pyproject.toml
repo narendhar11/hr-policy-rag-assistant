@@ -1,7 +1,7 @@
 [project]
 name = "production-rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "HR Policy RAG Assistant — LangChain + Groq + Qdrant + Jina Embeddings"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -11,10 +11,18 @@ dependencies = [
     "langchain-core",
     "langchain-groq",
     "langchain-text-splitters",
-    "faiss-cpu",
     "jinaai",
     "streamlit",
-    "pyyaml",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.19.0",
+    "portkey-ai>=2.3.4",
+    "langchain-openai>=1.6.2",
+    "openevals>=0.2.0",
+    "langsmith>=0.12.2",
+]
+
+[project.optional-dependencies]
+dev = [
     "pytest",
 ]
 
