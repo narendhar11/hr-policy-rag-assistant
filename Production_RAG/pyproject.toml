@@ -17,6 +17,8 @@ dependencies = [
     "qdrant-client>=1.19.0",
     "portkey-ai>=2.3.4",
     "langchain-openai>=1.6.2",
+    "openevals>=0.2.0",
+    "langsmith>=0.12.2",
 ]
 
 [project.optional-dependencies]

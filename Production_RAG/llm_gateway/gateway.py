@@ -39,5 +39,5 @@ def get_gateway_guard_llm() -> ChatOpenAI:
         base_url=PORTKEY_GATEWAY_URL,
         default_headers=headers,
         model_kwargs={"response_format": {"type": "json_object"}},
-        max_tokens=256,
+        max_tokens=1024,
     )

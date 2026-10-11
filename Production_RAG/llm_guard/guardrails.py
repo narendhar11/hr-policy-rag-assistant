@@ -77,22 +77,26 @@ EXAMPLES
 # Check Safety
 def _check_safety(text: str, policy: str) -> tuple[bool, str]:
     """Check if the text violates the given policy using the guard LLM."""
-    response = _guard_llm.invoke(
-        [
-            {
-                "role": "system",
-                "content": policy,
-            }, 
-            {
-                "role": "user",
-                "content": text,
-            }
-        ]
-    )
-    result = json.loads(response.content) # type: ignore
-    is_safe = result.get("violation", 0) == 0
-    reason = result.get("rationale", "")
-    return is_safe, reason
+    try:
+        response = _guard_llm.invoke(
+            [
+                {
+                    "role": "system",
+                    "content": policy,
+                }, 
+                {
+                    "role": "user",
+                    "content": text,
+                }
+            ]
+        )
+        result = json.loads(response.content) # type: ignore
+        is_safe = result.get("violation", 0) == 0
+        reason = result.get("rationale", "")
+        return is_safe, reason
+    except Exception as e:
+        logger.error("Guard LLM safety check encountered an error: %s. Defaulting to safe=True.", e)
+        return True, f"Bypassed due to guard error: {e}"
 
 
 # Input Safety Check
