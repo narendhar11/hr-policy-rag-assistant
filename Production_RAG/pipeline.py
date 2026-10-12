@@ -9,7 +9,7 @@ from vectordb.vector_store import (
     load_vector_store,
     vector_store_exists,
 )
-from retrieval.retriever import get_retriever
+from retrieval.retriever import get_retriever, get_reranked_retriever
 from llm.llm_client import get_llm
 from tools.tools import search_hr_policy_tool
 from agent.agent import create_hr_policy_agent
@@ -46,8 +46,17 @@ def build_hr_policy_assistant(file_path: str = config.DATA_FILE_PATH):
     # Build or load the vector store
     vector_store = build_vector_store_for_documents(file_path)
 
-    # Create a retriever from the vector store
-    retriever = get_retriever(vector_store)
+    # Create a retriever from the vector store (with neural reranking if enabled)
+    if getattr(config, "USE_RERANKER", True):
+        retriever = get_reranked_retriever(vector_store)
+        logger.info(
+            "Initialized retriever with Jina neural reranking (candidate_k=%d, top_k=%d)",
+            config.CANDIDATE_K,
+            config.TOP_K_RESULTS,
+        )
+    else:
+        retriever = get_retriever(vector_store)
+        logger.info("Initialized standard vector retriever without reranking")
 
     # Get the LLM model
     llm = get_llm()

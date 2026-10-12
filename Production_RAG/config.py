@@ -30,6 +30,10 @@ EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL", "jina-embeddings-v2-base-en"
 CHUNK_SIZE           = int(os.getenv("CHUNK_SIZE", "500"))
 CHUNK_OVERLAP        = int(os.getenv("CHUNK_OVERLAP", "50"))
 TOP_K_RESULTS        = int(os.getenv("TOP_K_RESULTS", "3"))
+CANDIDATE_K          = int(os.getenv("CANDIDATE_K", "10"))
+JINA_RERANKER_MODEL  = os.getenv("JINA_RERANKER_MODEL", "jina-reranker-v3.5")
+JINA_RERANK_URL      = os.getenv("JINA_RERANK_URL", "https://api.jina.ai/v1/rerank")
+USE_RERANKER         = os.getenv("USE_RERANKER", "true").lower() == "true"
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = (

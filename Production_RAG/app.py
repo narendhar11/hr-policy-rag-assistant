@@ -224,7 +224,7 @@ with st.sidebar:
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">LangChain</div><div class="stack-r">Agent framework</div></div></div>
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Groq</div><div class="stack-r">LLM inference</div></div></div>
     <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Qdrant</div><div class="stack-r">Cloud vector store</div></div></div>
-    <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Jina</div><div class="stack-r">Embeddings</div></div></div>
+    <div class="stack-row"><div class="pip"></div><div><div class="stack-n">Jina AI</div><div class="stack-r">Embeddings + Reranker</div></div></div>
     <div class="divider"></div>
     """, unsafe_allow_html=True)
 

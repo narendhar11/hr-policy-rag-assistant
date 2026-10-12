@@ -44,7 +44,9 @@ hr-policy-rag-assistant/
 │   ├── vectordb/
 │   │   └── vector_store.py       # Qdrant Cloud collection management
 │   ├── retrieval/
-│   │   └── retriever.py          # Vector store retriever setup
+│   │   └── retriever.py          # Vector store retriever setup with neural reranking
+│   ├── reranking/
+│   │   └── reranker.py           # Jina AI neural cross-encoder reranker
 │   ├── llm/
 │   │   └── llm_client.py         # Main LLM client via Portkey Gateway
 │   ├── llm_gateway/
@@ -60,7 +62,7 @@ hr-policy-rag-assistant/
 │   │   └── tracing.py            # LangSmith tracing initialization
 │   ├── data/
 │   │   └── hr_policies.txt       # Vertexon Solutions company policy document
-│   ├── tests/                    # 45 Pytest unit tests
+│   ├── tests/                    # 56 Pytest unit tests
 │   ├── pyproject.toml            # Python packaging & uv dependency manifest
 │   └── .env.example              # Environment variables template
 ├── docs/                         # Architecture deep-dive documentation
@@ -69,7 +71,8 @@ hr-policy-rag-assistant/
 │   ├── 03_prompt_injections.md   # Security guardrails & red-teaming
 │   ├── 04_local_to_cloud_vector_store.md # FAISS to Qdrant Cloud migration
 │   ├── 05_llm_gateway.md         # Portkey AI Gateway & automatic fallback
-│   └── 06_evaluations.md         # LangSmith evaluation & LLM-as-judge
+│   ├── 06_evaluations.md         # LangSmith evaluation & LLM-as-judge
+│   └── 07_reranking.md           # Two-stage retrieval & neural cross-encoder reranking
 └── README.md                     # Project overview
 ```
 
@@ -206,7 +209,7 @@ All settings in [`Production_RAG/config.py`](Production_RAG/config.py) can be cu
 
 ## 🧪 Testing
 
-The test suite contains **45 unit tests** run with `pytest` (mocking external API calls):
+The test suite contains **55 unit tests** run with `pytest` (mocking external API calls):
 
 ```bash
 cd Production_RAG
@@ -217,7 +220,8 @@ uv run pytest tests/ -v
 * Document Ingestion (`test_ingestion.py`)
 * Text Chunking (`test_chunking.py`)
 * Qdrant Cloud Operations (`test_vectordb.py`)
-* Retriever & Top-K Retrieval (`test_retrieval.py`)
+* Retriever & Two-Stage Retrieval (`test_retrieval.py`)
+* Neural Cross-Encoder Reranking (`test_reranker.py`)
 * Tool Calling & Execution (`test_tools.py`)
 * Guardrails & Injection Defense (`test_guardrails.py`)
 * System Prompts Integrity (`test_prompts.py`)
@@ -236,6 +240,7 @@ Explore our detailed engineering walkthroughs:
 * [04. Migrating from Local FAISS to Qdrant Cloud](docs/04_local_to_cloud_vector_store.md)
 * [05. Adding an LLM Gateway with Portkey AI](docs/05_llm_gateway.md)
 * [06. Automated Evaluations & LLM-as-Judge](docs/06_evaluations.md)
+* [07. Two-Stage Retrieval & Neural Reranking](docs/07_reranking.md)
 
 ---
 

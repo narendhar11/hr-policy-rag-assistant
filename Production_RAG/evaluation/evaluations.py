@@ -43,7 +43,7 @@ import config
 from utils.logger import get_logger
 from pipeline import build_hr_policy_assistant, ask_hr_policy_question
 from vectordb.vector_store import load_vector_store
-from retrieval.retriever import get_retriever
+from retrieval.retriever import get_retriever, get_reranked_retriever
 
 logger = get_logger(__name__)
 
@@ -210,7 +210,12 @@ def run_evaluation():
     # avoiding redundant connections to Qdrant and LLM initialization.
     logger.info("Building HR Policy Assistant agent and Qdrant retriever...")
     agent = build_hr_policy_assistant()
-    retriever = get_retriever(load_vector_store())
+    vector_store = load_vector_store()
+    retriever = (
+        get_reranked_retriever(vector_store)
+        if getattr(config, "USE_RERANKER", True)
+        else get_retriever(vector_store)
+    )
 
     def target(inputs: dict) -> dict:
         """Run a test question through the agent and retrieve context chunks.
